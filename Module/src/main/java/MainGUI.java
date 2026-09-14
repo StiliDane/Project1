@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import com.formdev.flatlaf.FlatDarkLaf;
+
+
 public class MainGUI extends JFrame {
     private JTextField idField;
     private JTextField titleField;
@@ -17,23 +20,25 @@ public class MainGUI extends JFrame {
     // the constructor for the class. This will initialize
     // the class's member variables:
     public MainGUI() {
-        // set sessions to a new empty list:
-        // sessions = ...
+        // Uncommented: This actually builds and shows the window
         setTitle("Employee Mentorship and Inclusion Manager");
         setSize(600, 600);
-        // when this frame/window closes, halt the whole program:
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         createGUI();
         setVisible(true);
     }
 
-    // Create all of the display elements in the frame:
+    // Create all the display elements in the frame:
     private void createGUI() {
-        // first, the input panel contains all of the field entry elements:
+        // first, the input panel contains all the field entry elements:
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new GridLayout(8,2,5,5));
-        // these are all of the input fields that will be in the frame:
+
+        // main screen setup
+        getContentPane().setBackground(Color.BLACK);
+
+        // these are all the input fields that will be in the frame:
         idField = new JTextField();
         titleField = new JTextField();
         mentorField = new JTextField();
@@ -53,19 +58,29 @@ public class MainGUI extends JFrame {
         inputPanel.add(new JLabel("Max Participants"));
         inputPanel.add(maxField);
         add(inputPanel, BorderLayout.NORTH);
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        inputPanel.setOpaque(false);
 
         // next, the lower half of the window contains an output area
         outputArea = new JTextArea();
         outputArea.setEditable(false);
+        outputArea.setBackground(Color.BLACK);
+        outputArea.setForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(outputArea);
         add(scroll, BorderLayout.CENTER);
         JPanel buttonPanel = new JPanel();
         JButton addButton = new JButton("Add Session");
+        styleButton(addButton, new Color(46, 204, 113), new Color(19, 154, 76));
         JButton displayButton = new JButton("Display");
+        styleButton(displayButton, new Color(52, 152, 219), new Color(21, 108, 165));
         JButton searchButton = new JButton("Search");
+        styleButton(searchButton, new Color(155, 89, 182), new Color(122, 48, 153));
         JButton removeButton = new JButton("Remove");
+        styleButton(removeButton, new Color(231, 76, 60), new Color(172, 37, 23));
         JButton registerButton = new JButton("Register");
+        styleButton(registerButton, new Color(241, 196, 15), new Color(223, 136, 0));
         JButton exitButton = new JButton("Exit");
+        styleButton(exitButton, new Color(149, 165, 166), new Color(107, 120, 121));
         buttonPanel.add(addButton);
         buttonPanel.add(displayButton);
         buttonPanel.add(searchButton);
@@ -73,6 +88,9 @@ public class MainGUI extends JFrame {
         buttonPanel.add(registerButton);
         buttonPanel.add(exitButton);
         add(buttonPanel, BorderLayout.SOUTH);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        buttonPanel.setOpaque(false);
+
 
         // Button Actions
         addButton.addActionListener(e -> addSession());
@@ -81,6 +99,44 @@ public class MainGUI extends JFrame {
         removeButton.addActionListener(e -> removeSession());
         registerButton.addActionListener(e -> registerParticipant());
         exitButton.addActionListener(e -> System.exit(0));
+    }
+
+    private void styleButton(JButton button, Color mainColor, Color shadowColor) {
+        button.setBackground(mainColor);
+        button.setForeground(Color.WHITE);
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        button.setFocusPainted(false);
+
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+
+        // Shadow on the bottom
+        javax.swing.border.Border unpressedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 4, 1, shadowColor),
+                BorderFactory.createEmptyBorder(8, 15, 8, 15)
+        );
+
+        // Shifts button down to simulate pressed
+        javax.swing.border.Border pressedBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(4, 1, 1, 1, shadowColor),
+                BorderFactory.createEmptyBorder(8, 15, 8, 15)
+        );
+
+        button.setBorder(unpressedBorder);
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                button.setBackground(shadowColor);
+                button.setBorder(pressedBorder);
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                button.setBackground(mainColor);
+                button.setBorder(unpressedBorder);
+            }
+        });
     }
 
     // set all input fields to empty strings, give focus to the first
@@ -131,7 +187,7 @@ public class MainGUI extends JFrame {
         outputArea.append("\n--------------------\n");
     }
 
-    // search by ID if presesnt, mentor otherwise, display results
+    // search by ID if present, mentor otherwise, display results
     private void searchSession() {
         // Search by ID if the ID field is not empty
         if (!idField.getText().trim().isEmpty()) {
@@ -180,6 +236,9 @@ public class MainGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        new MainGUI();
+        FlatDarkLaf.setup();
+
+        SwingUtilities.invokeLater(MainGUI::new);
+
     }
 }
