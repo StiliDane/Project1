@@ -12,10 +12,9 @@ public class MainGUI extends JFrame {
     private JTextField locationField;
     private JTextField maxField;
 
-    private JTextArea outputArea;
+    private JTextPane outputArea;
 
-    // there should be a private member variable named `sessions` :
-    // private SomethingOrOther sessions;
+    private static SessionList list = new SessionList(null, null);
 
     // the constructor for the class. This will initialize
     // the class's member variables:
@@ -62,7 +61,8 @@ public class MainGUI extends JFrame {
         inputPanel.setOpaque(false);
 
         // next, the lower half of the window contains an output area
-        outputArea = new JTextArea();
+        outputArea = new JTextPane();
+        outputArea.setContentType("text/html");
         outputArea.setEditable(false);
         outputArea.setBackground(Color.BLACK);
         outputArea.setForeground(Color.WHITE);
@@ -161,8 +161,9 @@ public class MainGUI extends JFrame {
             String location = locationField.getText();
             int maxParticipants = Integer.parseInt(maxField.getText());
 
-            // TO DO: construct a session object, insert it into
-            // the list of sessions
+            Session session = new Session(id, title, mentor, date, location, 0, maxParticipants);
+
+            list = SessionList.append(list, session);
 
             outputArea.setText("Session Added Successfully\n");
             // Clear the input fields
@@ -175,16 +176,16 @@ public class MainGUI extends JFrame {
 
     // display all sessions in the output area
     private void displaySessions() {
-        outputArea.setText("");
+        StringBuilder htmlContent = new StringBuilder("<html><body style='font-family: sans-serif;'>");
 
-        // iterate over sessions; display each one
-        // to the output window, using the `append`
-        // method of the outputArea.
+        int len = list.length();
+        for (int i = 0; i < len; i++){
+            htmlContent.append("<p>").append(list.get(i).session().toString()).append("</p>");
+            htmlContent.append("<hr>");
+        }
 
-        // between each one, print a separator line,
-        // as e.g.
-
-        outputArea.append("\n--------------------\n");
+        htmlContent.append("</body></html>");
+        outputArea.setText(htmlContent.toString());
     }
 
     // search by ID if present, mentor otherwise, display results
@@ -233,6 +234,16 @@ public class MainGUI extends JFrame {
         int id = Integer.parseInt(idField.getText());
         // increment participants field of session,
         // print success or failure message.
+    }
+
+    public static boolean listContains(int id){
+        int len = list.length();
+        for (int i = 0; i < len; i++){
+            if (list.get(i).session().id() == id)
+                return true;
+        }
+
+        return false;
     }
 
     public static void main(String[] args) {

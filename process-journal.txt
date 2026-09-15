@@ -1,0 +1,11 @@
+(Note, process journal created after UI changes were made)
+
+Entry 1 (9/14/26 10:15-10:50)
+    - Created the Session and SessionList
+    - Created the Append, Get, and Length function in Session List
+    - Created the toString for Session
+
+Entry 2 (9/15/26 11:24-11:45)
+    - Changed the list variable to static
+    - Created the List Contains ID method
+    - Properly throws an error when creating a meeting if a meeting with the same ID is already made
