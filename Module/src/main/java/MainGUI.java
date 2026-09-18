@@ -154,23 +154,34 @@ public class MainGUI extends JFrame {
     // the action of the Add Session button
     private void addSession() {
         try {
-            int id = Integer.parseInt(idField.getText());
+            int id = Integer.parseInt(idField.getText().trim());
+
+            // Check for duplicate ID
+            if (listContains(id)) {
+                outputArea.setText("ID " + id + " is already assigned to another meeting. Please choose another ID.");
+                return;
+            }
+
             String title = titleField.getText();
             String mentor = mentorField.getText();
             String date = dateField.getText();
             String location = locationField.getText();
-            int maxParticipants = Integer.parseInt(maxField.getText());
+            int maxParticipants = Integer.parseInt(maxField.getText().trim());
 
             Session session = new Session(id, title, mentor, date, location, 0, maxParticipants);
 
-            list = SessionList.append(list, session);
+            // Append the session, then immediately sort the list so it stays ordered by date
+            SessionList unsortedList = SessionList.append(list, session);
+            list = SessionList.sortByDate(unsortedList);
 
             outputArea.setText("Session Added Successfully\n");
-            // Clear the input fields
             clearFields();
         }
+        catch(NumberFormatException e) {
+            outputArea.setText("Invalid input: Please ensure ID and Max Participants are numbers.");
+        }
         catch(Exception e) {
-            outputArea.setText("Invalid input");
+            outputArea.setText("Invalid input.");
         }
     }
 
@@ -178,10 +189,16 @@ public class MainGUI extends JFrame {
     private void displaySessions() {
         StringBuilder htmlContent = new StringBuilder("<html><body style='font-family: sans-serif;'>");
 
-        int len = list.length();
-        for (int i = 0; i < len; i++){
-            htmlContent.append("<p>").append(list.get(i).session().toString()).append("</p>");
-            htmlContent.append("<hr>");
+        // Protect against empty/null lists
+        if (list == null || list.session() == null) {
+            htmlContent.append("<p>No sessions found.</p>");
+        } else {
+            // No need to sort here anymore! The list is always sorted when items are added.
+            int len = list.length();
+            for (int i = 0; i < len; i++){
+                htmlContent.append("<p>").append(list.get(i).session().toString()).append("</p>");
+                htmlContent.append("<hr>");
+            }
         }
 
         htmlContent.append("</body></html>");
@@ -192,27 +209,50 @@ public class MainGUI extends JFrame {
     private void searchSession() {
         // Search by ID if the ID field is not empty
         if (!idField.getText().trim().isEmpty()) {
-            int id = Integer.parseInt(idField.getText().trim());
-            // find session by ID, using a `searchByID` method
-            // ... code here ...
-            /* if (result != null)
-                // display session to the output area...
-            else
-                outputArea.setText("Session not found.");
-             */
+            try {
+                int id = Integer.parseInt(idField.getText().trim());
+
+                StringBuilder htmlContent = new StringBuilder("<html><body style='font-family: sans-serif;'>");
+
+                SessionList validSessions = SessionList.getSession(list, id);
+
+                if (validSessions == null || validSessions.session() == null) {
+                    htmlContent.append("<p>No sessions found with that ID.</p>");
+                } else {
+                    int len = validSessions.length();
+                    for (int i = 0; i < len; i++) {
+                        htmlContent.append("<p>").append(validSessions.get(i).session().toString()).append("</p>");
+                        htmlContent.append("<hr>");
+                    }
+                }
+
+                htmlContent.append("</body></html>");
+                outputArea.setText(htmlContent.toString());
+            } catch (NumberFormatException e) {
+                // Catch invalid ID formats during search
+                outputArea.setText("Please enter a valid Session ID to search.");
+            }
         }
         // Otherwise, search by mentor if the Mentor field is not empty
         else if (!mentorField.getText().trim().isEmpty()) {
             String mentor = mentorField.getText().trim();
-            // find session by mentor. In this case, the result
-            // may be a list of sessions...
-            // ... code here ...
-            /*
-            if (result != null)
-                // display all sessions in the list
-            else
-                outputArea.setText("No session found for mentor: " + mentor);
-             */
+
+            StringBuilder htmlContent = new StringBuilder("<html><body style='font-family: sans-serif;'>");
+
+            SessionList validSessions = SessionList.getSession(list, mentor);
+
+            if (validSessions == null || validSessions.session() == null) {
+                htmlContent.append("<p>No sessions found for that mentor.</p>");
+            } else {
+                int len = validSessions.length();
+                for (int i = 0; i < len; i++) {
+                    htmlContent.append("<p>").append(validSessions.get(i).session().toString()).append("</p>");
+                    htmlContent.append("<hr>");
+                }
+            }
+
+            htmlContent.append("</body></html>");
+            outputArea.setText(htmlContent.toString());
         }
         // Nothing entered
         else {
@@ -222,18 +262,39 @@ public class MainGUI extends JFrame {
 
     // given an id, remove that session from the list
     private void removeSession() {
-        int id = Integer.parseInt(idField.getText());
-        // remove the session, print an error to the outputArea
-        // if it's not found
-        // ... code here ...
+        try {
+            int id = Integer.parseInt(idField.getText().trim());
+            SessionList output = SessionList.remove(list, id);
+
+            if (output == null) {
+                outputArea.setText("Nothing to remove.");
+            } else {
+                outputArea.setText("Successfully removed session " + id);
+                list = output;
+            }
+        } catch (NumberFormatException e) {
+            outputArea.setText("Please enter a valid numeric Session ID.");
+        }
     }
 
     // add one to the count of the specified session.
     // MUTATES participant count of session.
     private void registerParticipant() {
-        int id = Integer.parseInt(idField.getText());
-        // increment participants field of session,
-        // print success or failure message.
+        try {
+            int id = Integer.parseInt(idField.getText().trim());
+
+            SessionList newList = SessionList.incrementSession(list, id);
+
+            // Check the variable we just created, don't call the method again!
+            if (newList == null) {
+                outputArea.setText("Either ID is invalid or the session is full.");
+            } else {
+                outputArea.setText("Successfully registered for session " + id);
+                list = newList; // Update your global list reference
+            }
+        } catch (NumberFormatException e) {
+            outputArea.setText("Please enter a valid numeric Session ID.");
+        }
     }
 
     public static boolean listContains(int id){
@@ -244,6 +305,11 @@ public class MainGUI extends JFrame {
         }
 
         return false;
+    }
+
+    public static void removeSession(int id){
+        if (listContains(id))
+            list = SessionList.remove(list, id);
     }
 
     public static void main(String[] args) {

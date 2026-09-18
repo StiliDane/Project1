@@ -9,3 +9,8 @@ Entry 2 (9/15/26 11:24-11:45)
     - Changed the list variable to static
     - Created the List Contains ID method
     - Properly throws an error when creating a meeting if a meeting with the same ID is already made
+
+Entry 3 (9/17/26 3:20-4:48)
+    - Created the sortByDate function to create a sorted list (initially tried to use a selection sort however it proved difficult so I did some research on sorting of linked lists and switched to a merge sort)
+    - Updated the Search function to properly find sessions by date or id
+    - Set up remove function to properly remove the given session if it exists in the list
