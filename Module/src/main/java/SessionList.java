@@ -2,6 +2,10 @@ public record SessionList(Session session, SessionList rest) {
 
     /** Increments the given session by 1 participant */
     public static SessionList incrementSession(SessionList list, int id){
+        if (list == null || list.session() == null) {
+            return null; // No matching session
+        }
+
         int len = list.length();
         int index = -1;
         for (int i = 0; i < len; i++){
@@ -38,23 +42,62 @@ public record SessionList(Session session, SessionList rest) {
     }
 
     public static SessionList getSession(SessionList list, int id){
-        if (list == null)
+        switch(list) {
+            case null:
+                return null;
+            case SessionList(Session s,SessionList r):
+                if(s.id() == id)
+                    return new SessionList(s, null);
+                else {
+                    return getSession(r,id);
+                }
+        }
+        /*
+        if (list.session == null)
             return null;
 
-        if (list.session.id() == id)
-            return new SessionList(list.session, null);
+         if (list.session.id() == id)
+            return
 
-        return getSession(list.rest, id);
+
+
+         */
+
+        /*if (list == null) {
+            return null;
+        }
+
+        else if (list.session.id() == id) {
+            return new SessionList(list.session, null);
+        }
+
+        else {
+            return getSession(list.rest, id);
+        }*/
     }
 
     public static SessionList getSession(SessionList list, String mentor){
-        if (list == null)
+
+        switch(list) {
+            case null:
+                return null;
+            case SessionList(Session s,SessionList r):
+                if(s.mentor().equals(mentor))
+                    return new SessionList(s, null);
+                else {
+                    return getSession(r,mentor);
+                }
+        }
+
+        /*if (list == null) {
             return null;
-
-        if (list.session.mentor().equals(mentor))
+        }
+        else if (list.session.mentor().equals(mentor)) {
             return new SessionList(list.session, getSession(list.rest, mentor));
-
-        return getSession(list.rest, mentor);
+        }
+        else {
+            return getSession(list.rest, mentor);
+        }*/
     }
 
     /** returns a SessionList sorted by date */
@@ -91,8 +134,10 @@ public record SessionList(Session session, SessionList rest) {
     }
 
     private static SessionList sortedMerge(SessionList a, SessionList b){
-        if (a == null) return b;
-        if (b == null) return a;
+        if (a == null)
+            return b;
+        if (b == null)
+            return a;
 
         String dateA = a.session.date();
         String dateB = b.session.date();
@@ -105,8 +150,8 @@ public record SessionList(Session session, SessionList rest) {
 
 
     /** adds a session to the end */
-    public static SessionList append(SessionList list, Session session){
-        SessionList output = new SessionList(session, null);
+    public static SessionList append(SessionList list, Session newSession){
+        SessionList output = new SessionList(newSession, null);
 
         for (int i = list.length() - 1; i >= 0; i--){
 
@@ -149,6 +194,8 @@ public record SessionList(Session session, SessionList rest) {
             return 0;
         if (rest == null)
             return 1;
+
+        int length = 0;
 
         return rest.length() + 1;
     }

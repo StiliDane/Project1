@@ -14,3 +14,7 @@ Entry 3 (9/17/26 3:20-5:20)
     - Created the sortByDate function to create a sorted list (initially tried to use a selection sort however it proved difficult so I did some research on sorting of linked lists and switched to a merge sort)
     - Updated the Search function to properly find sessions by date or id
     - Set up remove function to properly remove the given session if it exists in the list
+
+Entry 4 (9/18/26 10:00-10:35)
+    - Adjusted both getSession method variations to use switch case recursion instead of if statements
+    - Updated remove function to check intial values of list and lis.session if null to prevent unnecessary running
